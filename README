@@ -1,0 +1,5 @@
+The point is to calculate stats from parameters of Wikipedia dumps. Like, the most frequently occuring 'oclc' number or something.
+
+Dependencies:
+mwparserfromhell #to objectize wikitext
+page_parse #to do something for every page in a wikipedia dump
