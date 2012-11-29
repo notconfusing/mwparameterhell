@@ -7,7 +7,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-wcwiki = open('oclcNumCount.text', 'w')
+wcwiki = open('/data/users/kleinm/oclcNumCount.text', 'w')
 
 #TODO: Convert HTML entities. 
 #TODO: Unicodify the regexes
@@ -189,7 +189,7 @@ def tabSeparatedString(inlist):
     for subthing in inlist:
         returnString += unicode(subthing) + '\t'
     return returnString
-page_parser.parseWithCallback("partenwiki.xml", robPageMWPFH)
+page_parser.parseWithCallback("/data/users/kleinm/enwiki.xml", robPageMWPFH)
 
 sortedOCLCNums = sorted(oclcNumDict, key=oclcNumDict.get, reverse=True)
 totalOCLCs = 0
