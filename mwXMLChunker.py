@@ -9,7 +9,7 @@ CORES = 32
 filedict = {}
 for i in range(1, CORES+1):
     filenumber = i
-    filedict[i] = open('chunks/enwiki_chunked_' + str(filenumber) + '.xml', 'w+') #naming convention
+    filedict[i] = open('/data/users/kleinm/enwiki_chunked_' + str(filenumber) + '.xml', 'w+') #naming convention
 
 #delcaration constant text
 initialtext = """<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.7/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.7/ http://www.mediawiki.org/xml/export-0.7.xsd" version="0.7" xml:lang="en">
@@ -57,6 +57,7 @@ for line in fileinput.input(indump): #read the file line by line
     if line == '  <page>\n': #a new page opening
         if currfile % CORES == 0:
             currfile = 1
+            print 'cycled'
         else:
             currfile += 1
     print currfile
@@ -70,7 +71,6 @@ for filenum in filedict:
 #close the files
 for filenum in filedict:
     filedict[filenum].close()
-
 
 
     
