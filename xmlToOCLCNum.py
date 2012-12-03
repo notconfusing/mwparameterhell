@@ -7,6 +7,7 @@ import os
 import json #for saving
 ##for unicode
 import sys
+import logging
 reload(sys)
 sys.setdefaultencoding("utf-8")\
 
@@ -15,6 +16,7 @@ sys.setdefaultencoding("utf-8")\
 LUMP_DIR = '/data/users/kleinm/enwiki_lumps'
 SUBRESULT_DIR = '/data/users/kleinm/subresults'
 CORES = len(os.listdir(LUMP_DIR))
+logging.basicConfig(filename='/data/users/kleinm/xmlToOCLCNum.log',level=logging.DEBUG)
 
 ##The call back that is run over each lump
 oclcNumDict = defaultdict(int)
@@ -61,9 +63,14 @@ def parseALump(lumpnum):
     lumplocation = LUMP_DIR + '/enwiki_lumped_' + str(lumpnum) + '.xml'
     subresultlocation = SUBRESULT_DIR + '/' + str(lumpnum) + '.json'
     page_parser.parseWithCallback(lumplocation, findOCLCNums)
+    logging.info('%s , got to page_parser', str(lumpnum))
+    logging.info('%s , had an oclcNumDict of len', oclcNumDict)
     oclcNumJSON = open(subresultlocation, 'w')
+    logging.info('%s , got to open %s', str(lumpnum), subresultlocation)
     json.dump(oclcNumDict, oclcNumJSON, indent=4)
+    logging.info('%s , got to jsondump %s', str(lumpnum), oclcNumJSON)
     oclcNumJSON.close()
+    logging.info('%s , got to close the JSON dump', str(lumpnum))
 
 
 #make a list of jobs and run and wait for them
@@ -75,7 +82,7 @@ for i in range(1,CORES+1):
 for job in jobs: job.start()
 for job in jobs: job.join()
 
-print 'hurray'
+logging.info('The top loop got executed after joining')
 
 #load the saved dicts into one mega dict for sorting
 def incorporateDicts(dictA, dictB):
@@ -89,16 +96,18 @@ def incorporateDicts(dictA, dictB):
 
 resultDict = {}
 
+#merge the result dicts
 for i in range (1, CORES+1):
     tempDictName = SUBRESULT_DIR + '/' + str(i) + '.json'
+    logging.info('tempDictName was %s', tempDictName)
     subDict = json.load(open(tempDictName)) #open the file and recognize it as json
     resultDict = incorporateDicts(subDict, resultDict)
 
-print 'resultDict', resultDict
+logging.info('resultDict had a was %s', resultDict)
 
 sortedOCLCNums = sorted(resultDict, key=resultDict.get, reverse=True)
 
-print 'sorted', sortedOCLCNums
+logging.info('Sorted was e%s', sortedOCLCNums)
 
 wcwiki = open('/data/users/kleinm/oclcNumCount.text', 'w')
 
