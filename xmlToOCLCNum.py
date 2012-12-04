@@ -26,15 +26,15 @@ def findOCLCNums(page):
     pagetext = page.text
     global oclcNumDict 
     global totalpages
-    wikicode = mwparserfromhell.parse(pagetext)
-    templates = wikicode.filter_templates(recursive=True)
-    for template in templates:
-        if isCiteTemplate(template.name):
-            for param in template.params:
-                if isOCLCparam(param.name):
-                    oclcNumDict[isAnOCLCNum(param.value)] += 1
-                    #OCLCnum = isAnOCLCNum(param.value)
-                    #oclcNumDict[OCLCnum] += 1 if OCLCnum else 0 #Ternary operator
+    if totalpages < 10000:
+        wikicode = mwparserfromhell.parse(pagetext)
+        templates = wikicode.filter_templates(recursive=True)
+        for template in templates:
+            if isCiteTemplate(template.name):
+                for param in template.params:
+                    if isOCLCparam(param.name):
+                        oclcNumDict[isAnOCLCNum(param.value)] += 1
+    totalpages += 1
                     
 def isCiteTemplate(wikicode):
     for template in [u'CITE BOOK', u'CITE JOURNAL', u'CITE ENCYCLOPEDIA', u'CITE CONFERNCE', u'CITE ARXIV', u'CITE EPISODE', u'VCITE BOOK', u'VCITE JOURNAL']:
