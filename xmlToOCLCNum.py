@@ -30,7 +30,7 @@ def findOCLCNums(page):
         wikicode = mwparserfromhell.parse(pagetext)
         templates = wikicode.filter_templates(recursive=True)
     except RuntimeError:
-        print pagetext
+        return
     for template in templates:
         if isCiteTemplate(template.name):
             for param in template.params:
