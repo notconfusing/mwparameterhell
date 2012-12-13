@@ -9,7 +9,7 @@ import json #for saving
 import sys
 import logging
 reload(sys)
-sys.setdefaultencoding("utf-8")\
+sys.setdefaultencoding("utf-8")
 
 
 #constants for multiprocessing
@@ -36,7 +36,7 @@ def findOCLCNums(page):
         if isCiteTemplate(template.name):
             for param in template.params:
                 if isOCLCparam(param.name):
-                    oclcNumDict[isAnOCLCNum(param.value)].append(page.title)
+                    oclcNumDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
     totalpages += 1
                     
 def isCiteTemplate(wikicode):
