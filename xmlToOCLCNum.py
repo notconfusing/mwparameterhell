@@ -15,6 +15,7 @@ sys.setdefaultencoding("utf-8")\
 #constants for multiprocessing
 LUMP_DIR = '/data/users/kleinm/enwiki_lumps'
 SUBRESULT_DIR = '/data/users/kleinm/subresults'
+RESULT_FILE = '/data/users/kleinm/oclcNumCount.text'
 CORES = len(os.listdir(LUMP_DIR))
 logging.basicConfig(filename='/data/users/kleinm/xmlToOCLCNum.log',level=logging.DEBUG)
 
@@ -66,11 +67,9 @@ def parseALump(lumpnum):
     subresultlocation = SUBRESULT_DIR + '/' + str(lumpnum) + '.json'
     page_parser.parseWithCallback(lumplocation, findOCLCNums)
     logging.info('%s , got to page_parser', str(lumpnum))
-    logging.info('%s , had an oclcNumDict of len', oclcNumDict)
     oclcNumJSON = open(subresultlocation, 'w')
     logging.info('%s , got to open %s', str(lumpnum), subresultlocation)
     json.dump(oclcNumDict, oclcNumJSON, indent=4)
-    logging.info('%s , got to jsondump %s', str(lumpnum), oclcNumJSON)
     oclcNumJSON.close()
     logging.info('%s , got to close the JSON dump', str(lumpnum))
 
@@ -111,7 +110,7 @@ sortedOCLCNums = sorted(resultDict, key=resultDict.get, reverse=True)
 
 logging.info('Sorted was e%s', sortedOCLCNums)
 
-wcwiki = open('/data/users/kleinm/oclcNumCount.text', 'w')
+wcwiki = open(RESULT_FILE, 'w')
 
 totalOCLCs = 0 #keep track of extra statistics
 
