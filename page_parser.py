@@ -21,6 +21,7 @@ class WikiPage(object):
         self.title = u''
         self.id = u''
         self.text = u''
+        self.ns = u''
 
     def __str__(self):
         return 'ID %s TITLE %s' % (self.id.encode('utf_8'), self.title.encode('utf_8'))
@@ -97,6 +98,8 @@ class WikiDumpHandler(handler.ContentHandler):
             self.currentPage.title = content
         elif self.currentTag == 'text':
             self.currentPage.text = content
+        elif self.currentTag == 'ns': #customised
+            self.currentPage.ns = content
 
     def endDocument(self):
         print "Processed %d pages" % self.pagesProcessed
