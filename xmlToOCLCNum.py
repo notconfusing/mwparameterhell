@@ -8,6 +8,7 @@ import json #for saving
 ##for unicode
 import sys
 import logging
+import time
 reload(sys)
 sys.setdefaultencoding("utf-8")\
 
@@ -22,14 +23,27 @@ logging.basicConfig(filename='/data/users/kleinm/xmlToOCLCNum.log',level=logging
 ##The call back that is run over each lump
 oclcNumDict = defaultdict(int)
 totalpages = 0
-    
+ostarttime = time.time()
+pid = os.getpid()
+
+def reportStatus(totalpages):
+    global starttime
+    global pid
+    currtime = time.time()
+    elapsed = currtime-starttime
+    rate = int(totalpages / elapsed)
+    print 'pid', pid, 'pages per sec', rate, 'total pages', totalpages
+
 def findOCLCNums(page):
     pagetext = page.text
     global oclcNumDict 
     global totalpages
+    totalpages += 1
+    if totalpages % 1000 == 0:
+        reportStatus(totalpages)
     try:
         wikicode = mwparserfromhell.parse(pagetext)
-        templates = wikicode.filter_templates(recursive=True)
+        templates = wikicode.filter_templates(recursive=False) #Or True
     except RuntimeError:
         return
     for template in templates:
@@ -37,7 +51,6 @@ def findOCLCNums(page):
             for param in template.params:
                 if isOCLCparam(param.name):
                     oclcNumDict[isAnOCLCNum(param.value)] += 1
-    totalpages += 1
                     
 def isCiteTemplate(wikicode):
     for template in [u'CITE BOOK', u'CITE JOURNAL', u'CITE ENCYCLOPEDIA', u'CITE CONFERNCE', u'CITE ARXIV', u'CITE EPISODE', u'VCITE BOOK', u'VCITE JOURNAL']:

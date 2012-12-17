@@ -5,6 +5,7 @@ import multiprocessing
 from collections import defaultdict
 import os
 import json #for saving
+import time
 ##for unicode
 import sys
 import logging
@@ -22,23 +23,46 @@ logging.basicConfig(filename='/data/users/kleinm/xmlToOCLCNum.log',level=logging
 ##The call back that is run over each lump
 oclcNumDict = defaultdict(list)
 totalpages = 0
-    
+starttime = time.time()
+times = {'start':starttime,'previous':starttime} #we'll be keeping total speed and recent speed
+
+def reportStatus(totalpages):
+    global times
+    starttime = times['start']
+    prevtime = times['previous']
+    pid = os.getpid()
+    currtime = time.time()
+    totalelapsed = currtime-starttime
+    recentelapsed = currtime-prevtime
+    totalrate = int(totalpages / totalelapsed)
+    recentrate = int(1000/ recentelapsed) #on the assumption that reportStatus is called every 1000 pages
+    print 'pid', pid, 'instantaneous pps', recentrate, 'total pps', totalrate, 'total pages', totalpages
+    times['previous'] = currtime #save for next report
+    return recentrate
+   
 def findOCLCNums(page):
-    pagetext = page.text
-    global oclcNumDict 
-    global totalpages
-    try:
-        wikicode = mwparserfromhell.parse(pagetext)
-        templates = wikicode.filter_templates(recursive=True)
-    except RuntimeError:
-        return
-    for template in templates:
-        if isCiteTemplate(template.name):
-            for param in template.params:
-                if isOCLCparam(param.name):
-                    oclcNumDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
-    totalpages += 1
-                    
+    if page.ns == '0':
+        pagetext = page.text
+        global oclcNumDict 
+        global totalpages
+        totalpages += 1
+        #if totalpages < 200000:
+        #    return
+        if totalpages % 1000 == 0:
+            recentrate = reportStatus(totalpages)
+            if recentrate < 10:
+                print page.title
+        try:
+            wikicode = mwparserfromhell.parse(pagetext)
+            templates = wikicode.filter_templates(recursive=True)
+        except RuntimeError:
+            return
+        for template in templates:
+            if isCiteTemplate(template.name):
+                for param in template.params:
+                    if isOCLCparam(param.name):
+                        oclcNumDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
+
 def isCiteTemplate(wikicode):
     for template in [u'CITE BOOK', u'CITE JOURNAL', u'CITE ENCYCLOPEDIA', u'CITE CONFERNCE', u'CITE ARXIV', u'CITE EPISODE', u'VCITE BOOK', u'VCITE JOURNAL']:
         templateRE = re.findall(template, str(wikicode), re.IGNORECASE)
