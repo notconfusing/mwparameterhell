@@ -41,7 +41,7 @@ def reportStatus(totalpages):
     return recentrate
    
 def findOCLCNums(page):
-    if page.ns == '0':
+    if page.ns == '0': #search only the mainspace, can change over different namespaces
         pagetext = page.text
         global oclcNumDict 
         global totalpages
