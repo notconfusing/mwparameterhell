@@ -24,6 +24,8 @@ oclcNumDict = defaultdict(list)
 totalpages = 0
     
 def findOCLCNums(page):
+    if not page.ns == '0':
+        print page.title
     pagetext = page.text
     global oclcNumDict 
     global totalpages
@@ -80,8 +82,11 @@ for i in range(1,CORES+1):
     proc = multiprocessing.Process(target=parseALump, args=(i,))
     jobs.append(proc)
 
-for job in jobs: job.start()
-for job in jobs: job.join()
+for job in jobs: 
+    job.start()
+
+for job in jobs: 
+    job.join()
 
 logging.info('The top loop got executed after joining')
 
