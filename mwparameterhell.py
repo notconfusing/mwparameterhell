@@ -26,10 +26,12 @@ parser.add_argument("templateList", help="a comma seperated list of template Nam
 parser.add_argument("parameter", help="the parameter to search for. I.e if you were looking for director in {{Infobox movie|directory=Person}} use director. Case insensitive.")
 parser.add_argument("-s", "--subparamdelim", default=None, help="the character on which to separate subparameters (you may need to escape your char \). Defaults to None. I.e. if you had {{Cite|Last=Jones, Patel}} None seperation would mean you'd return 'Jones, Patel' or separation on comma -s=',' returns two entries 'Jones' and 'Patel'. You can seperate on space -s=' ' which is useful for numerics.")
 parser.add_argument("-g", "--graph", default=False, action="store_true", help="use R to generate a graph in your results directory")
+parser.add_argument("-n", "--namespaces", default=[0], help="a comma seperated list of namespace numbers to search, default is 0 only - the mainspace. This can drastically affect performance.")
+
 args = parser.parse_args()
 args.templateList = args.templateList.split(',')
 
-print "An excellent choice madam. Your order is, one fries, one milkshake.. \n the template(s): "+ str(args.templateList)+ "\n the parameter:"+ str(args.parameter)+ "\n delimiting subparameters on: "+ str(args.subparamdelim)+ "\n graphing: "+ str(args.graph)
+print "An excellent choice madam. Your order is, one fries, one milkshake.. \n the template(s): "+ str(args.templateList)+ "\n the parameter: "+ str(args.parameter)+ "\n namespaces: " + str(args.namespaces) + "\n delimiting subparameters on: "+ str(args.subparamdelim)+ "\n graphing: "+ str(args.graph)
 raw_input("Press enter to conintue or Ctrl-C to try again.")
 
 ##The call back that is run over each lump
@@ -40,13 +42,14 @@ class paramFinder:
     totalpages = 0 #totalpages we've paramFound so afr
     times = {'start':None,'previous':None} #we'll be keeping total speed and recent speed
     
-    def __init__(self, jobNumber, templateList, parameter, splitSymbol):
+    def __init__(self, jobNumber, templateList, parameter, splitSymbol, nsList):
         self.times['start']=time.time()
         self.times['previous'] = time.time()
-        self.jobNumber = jobNumber
+        self.jobNumber = str(jobNumber) if len(str(jobNumber))== 2 else ' ' + str(jobNumber)  #for formatting purposes
         self.templateList = templateList
         self.parameter = parameter
         self.splitSymbol = splitSymbol
+        self.nsList = nsList
         #when we get our subParams shall we list them or count them?
         
     def reportStatus(self, totalpages):
@@ -61,9 +64,9 @@ class paramFinder:
         return recentrate
        
     def findFun(self, page):
-        if page.ns == '0': #search only the mainspace, can change over different namespaces
+        self.totalpages += 1 
+        if int(page.ns) in self.nsList: #search only the mainspace, can change over different namespaces
             pagetext = page.text #get the wikitext portion of the page object
-            self.totalpages += 1 
             #if totalpages < 200000:
             #    return
             if self.totalpages % 1000 == 0: #let the user know things are happening
@@ -124,7 +127,7 @@ def parseALump(lumpnum):
     lumplocation = configurations.lumpDirectory + '/enwiki_lumped_' + str(lumpnum) + '.xml'
     countSubresultLocation = configurations.countSubresultDirectory + '/' + str(lumpnum) + '.json'
     listSubresultLocation = configurations.listSubresultDirectory + '/' + str(lumpnum) + '.json'
-    paramFind = paramFinder(lumpnum, args.templateList, args.parameter, args.subparamdelim)
+    paramFind = paramFinder(lumpnum, args.templateList, args.parameter, args.subparamdelim, args.namespaces)
     page_parser.parseWithCallback(lumplocation, paramFind.findFun)
     #save it off
     jsonCountFile = open(countSubresultLocation, 'w')

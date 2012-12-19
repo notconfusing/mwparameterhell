@@ -12,77 +12,62 @@ import logging
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+#Load configs
+class config:
+    def __init__(self, filename):
+        self.__dict__ = json.load(open(filename))
 
-#constants for multiprocessing
-LUMP_DIR = '/data/users/kleinm/enwiki_lumps'
-SUBRESULT_DIR = '/data/users/kleinm/subresults'
-RESULT_FILE = '/data/users/kleinm/oclcNumList.text'
-CORES = len(os.listdir(LUMP_DIR))
-logging.basicConfig(filename='/data/users/kleinm/xmlToOCLCNum.log',level=logging.DEBUG)
+configurations = config('config.json')
+
+
 
 ##The call back that is run over each lump
-oclcNumDict = defaultdict(list)
-totalpages = 0
-starttime = time.time()
-times = {'start':starttime,'previous':starttime} #we'll be keeping total speed and recent speed
+#the globals for each callback
 
-def reportStatus(totalpages):
-    global times
-    starttime = times['start']
-    prevtime = times['previous']
-    pid = os.getpid()
-    currtime = time.time()
-    totalelapsed = currtime-starttime
-    recentelapsed = currtime-prevtime
-    totalrate = int(totalpages / totalelapsed)
-    recentrate = int(1000/ recentelapsed) #on the assumption that reportStatus is called every 1000 pages
-    print 'pid', pid, 'instantaneous pps', recentrate, 'total pps', totalrate, 'total pages', totalpages
-    times['previous'] = currtime #save for next report
-    return recentrate
-   
-def findOCLCNums(page):
-<<<<<<< HEAD
-    if not page.ns == '0':
-        print page.title
-    pagetext = page.text
-    global oclcNumDict 
-    global totalpages
-    try:
-        wikicode = mwparserfromhell.parse(pagetext)
-        templates = wikicode.filter_templates(recursive=True)
-    except RuntimeError:
-        return
-    for template in templates:
-        if isCiteTemplate(template.name):
-            for param in template.params:
-                if isOCLCparam(param.name):
-                    oclcNumDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
-    totalpages += 1
-                    
-=======
-    if page.ns == '0': #search only the mainspace, can change over different namespaces
-        pagetext = page.text
-        global oclcNumDict 
-        global totalpages
-        totalpages += 1
-        #if totalpages < 200000:
-        #    return
-        if totalpages % 1000 == 0:
-            recentrate = reportStatus(totalpages)
-            if recentrate < 10:
-                print page.title
-        try:
-            wikicode = mwparserfromhell.parse(pagetext)
-            templates = wikicode.filter_templates(recursive=True)
-        except RuntimeError:
-            return
-        for template in templates:
-            if isCiteTemplate(template.name):
-                for param in template.params:
-                    if isOCLCparam(param.name):
-                        oclcNumDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
+class paramFinder:
+    occurencesDict = defaultdict(list) #might be a list of length 1 containing an int for amount, or a list of page names where it occurs
+    totalpages = 0 #totalpages we've paramFound so afr
+    times = {'start':None,'previous':None} #we'll be keeping total speed and recent speed
+    
+    def __init__(self, jobNumber):
+        self.times['start']=time.time()
+        self.times['previous'] = time.time()
+        self.jobNumber = jobNumber
+        
+    def reportStatus(self, totalpages):
+        self.jobNumber
+        currtime = time.time()
+        totalelapsed = currtime-self.times['start']
+        recentelapsed = currtime-self.times['previous']
+        totalrate = int(totalpages / totalelapsed)
+        recentrate = int(1000/ recentelapsed) #on the assumption that reportStatus is called every 1000 pages
+        print 'job', self.jobNumber, 'instantaneous pps', recentrate, 'total pps', totalrate, 'total pages', totalpages
+        self.times['previous'] = currtime #save for next report
+        return recentrate
+       
+    def findFun(self, page):
+        if page.ns == '0': #search only the mainspace, can change over different namespaces
+            pagetext = page.text
+            self.occurencesDict 
+            self.totalpages
+            self.totalpages += 1
+            #if totalpages < 200000:
+            #    return
+            if self.totalpages % 1000 == 0:
+                recentrate = self.reportStatus(self.totalpages)
+                if recentrate < 10:
+                    print page.title
+            try:
+                wikicode = mwparserfromhell.parse(pagetext)
+                templates = wikicode.filter_templates(recursive=True)
+            except RuntimeError:
+                return
+            for template in templates:
+                if isCiteTemplate(template.name):
+                    for param in template.params:
+                        if isOCLCparam(param.name):
+                            self.occurencesDict[isAnOCLCNum(param.value)].append(page.title.decode('utf_8'))
 
->>>>>>> 9315591b7f0fce4d40a9551f4eb31c9f992f128a
 def isCiteTemplate(wikicode):
     for template in [u'CITE BOOK', u'CITE JOURNAL', u'CITE ENCYCLOPEDIA', u'CITE CONFERNCE', u'CITE ARXIV', u'CITE EPISODE', u'VCITE BOOK', u'VCITE JOURNAL']:
         templateRE = re.findall(template, str(wikicode), re.IGNORECASE)
@@ -107,28 +92,22 @@ def isAnOCLCNum(wikicode):
         return None
 
 def parseALump(lumpnum):
-    lumplocation = LUMP_DIR + '/enwiki_lumped_' + str(lumpnum) + '.xml'
-    subresultlocation = SUBRESULT_DIR + '/' + str(lumpnum) + '.json'
-    page_parser.parseWithCallback(lumplocation, findOCLCNums)
-    logging.info('%s , got to page_parser', str(lumpnum))
+    lumplocation = configurations.lumpDirectory + '/enwiki_lumped_' + str(lumpnum) + '.xml'
+    subresultlocation = configurations.subresultDirectory + '/' + str(lumpnum) + '.json'
+    paramFind = paramFinder(lumpnum)
+    page_parser.parseWithCallback(lumplocation, paramFind.findFun)
     oclcNumJSON = open(subresultlocation, 'w')
-    logging.info('%s , got to open %s', str(lumpnum), subresultlocation)
-    json.dump(oclcNumDict, oclcNumJSON, indent=4)
+    json.dump(occurencesDict, oclcNumJSON, indent=4)
     oclcNumJSON.close()
-    logging.info('%s , got to close the JSON dump', str(lumpnum))
-
 
 #make a list of jobs and run and wait for them
 jobs = []
-for i in range(1,CORES+1):
+for i in range(1,configurations.cores+1):
     proc = multiprocessing.Process(target=parseALump, args=(i,))
     jobs.append(proc)
 
-for job in jobs: 
-    job.start()
-
-for job in jobs: 
-    job.join()
+for job in jobs: job.start()
+for job in jobs: job.join()
 
 logging.info('The top loop got executed after joining')
 
@@ -145,8 +124,8 @@ def incorporateDicts(dictA, dictB):
 resultDict = {}
 
 #merge the result dicts
-for i in range (1, CORES+1):
-    tempDictName = SUBRESULT_DIR + '/' + str(i) + '.json'
+for i in range (1,configurations.cores+1):
+    tempDictName = configurations.subresultDirectory + '/' + str(i) + '.json'
     logging.info('tempDictName was %s', tempDictName)
     subDict = json.load(open(tempDictName)) #open the file and recognize it as json
     resultDict = incorporateDicts(subDict, resultDict)
@@ -157,13 +136,13 @@ sortedOCLCNums = sorted(resultDict, key=resultDict.get, reverse=True)
 
 logging.info('Sorted was e%s', sortedOCLCNums)
 
-wcwiki = open(RESULT_FILE, 'w')
+wcwiki = open(configurations.resultFile, 'w')
 
 totalOCLCs = 0 #keep track of extra statistics
 
 for oclcNum in sortedOCLCNums:
     oclcNumOccurs = resultDict[oclcNum]
     wcwiki.write(str(oclcNum) + ' occurs ' + str(oclcNumOccurs) + '\n')
-wcwiki.write('total OCLC citations: ' + str(totalOCLCs))
+wcwiki.write('total amount ' + str(totalOCLCs))
 wcwiki.close()
     
