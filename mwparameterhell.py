@@ -20,6 +20,8 @@ class config:
 
 configurations = config('config.json')
 
+logging.basicConfig(filename='/data/users/kleinm/mwparameterhell.log',level=logging.DEBUG)
+
 #read in args and confirm
 parser = argparse.ArgumentParser()
 parser.add_argument("templateList", help="a comma seperated list of template Names. I.e. for Template:Infobox book and Template:Infobox movie do 'Infobox\ book, Infobox\ movie. Case insensitive.")
