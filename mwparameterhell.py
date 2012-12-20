@@ -56,8 +56,9 @@ for i in range(1,configurations.cores+1):
     jobs.append(proc)
 
 for job in jobs: job.start()
-for job in jobs:
-    job.join()
+for job in jobs: job.join()
+
+print 'all processes joined'
 
 logging.info('The uppermost loop got executed after joining')
 
