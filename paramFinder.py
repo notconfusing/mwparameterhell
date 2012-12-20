@@ -37,6 +37,7 @@ class paramFinder:
         self.totalpages += 1 
         if int(page.ns) in self.nsList: #search only the mainspace, can change over different namespaces
             pagetext = page.text #get the wikitext portion of the page object
+            pagetext = self.removeMath(pagetext)
             #if totalpages < 200000:
             #    return
             if self.totalpages % 1000 == 0: #let the user know things are happening
@@ -89,3 +90,10 @@ class paramFinder:
             return None
         else: 
             return subParamReturnList
+        
+    def removeMath(self, pagetext):
+        mathExpressions = re.finditer(ur'\<math\>.*?\<\/math\>', pagetext)
+        for mathExpression in mathExpressions:
+            pagetext = pagetext[:mathExpression.start()] + pagetext[mathExpression.end():]
+        return pagetext
+        
