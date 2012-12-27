@@ -3,6 +3,7 @@ import mwparserfromhell
 from collections import defaultdict
 import json #for saving
 import time
+import xml.etree.ElementTree as ET
 
 
 class paramFinder:
@@ -92,8 +93,11 @@ class paramFinder:
             return subParamReturnList
         
     def removeMath(self, pagetext):
-        mathExpressions = re.finditer(ur'\<math\>.*?\<\/math\>', pagetext)
-        for mathExpression in mathExpressions:
-            pagetext = pagetext[:mathExpression.start()] + pagetext[mathExpression.end():]
+        try:
+            root = ET.fromstring(pagetext)
+            for child in root:
+                print child.tag
+        except AssertionError:
+            print "not xml"
         return pagetext
         

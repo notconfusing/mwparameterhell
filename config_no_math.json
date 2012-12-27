@@ -1,0 +1,5 @@
+{
+    "cores": 32, 
+    "lumpDirectory": "/data/users/kleinm/enwiki_lumps",
+    "saveLumpDirectory": "/data/users/kleinm/enwiki_lumps_no_math"
+}
