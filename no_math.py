@@ -19,11 +19,10 @@ def deMath(pagetext):
     try:
         mathExpressions = re.finditer(ur'<math>.*?</math>', pagetext)
     except TypeError:
-        if pagetext:
-            print 'pagetext was not None and is: ', pagetext
-    total = 0
+        if not pagetext:
+            print 'page text was empty'
+        return pagetext
     for mathExpression in mathExpressions:
-        total += 1
         pagetext = pagetext[:mathExpression.start()] + pagetext[mathExpression.end():]
     return pagetext
 
