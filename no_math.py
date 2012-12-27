@@ -26,7 +26,6 @@ def deMath(pagetext):
         total += 1
         pagetext = pagetext[:mathExpression.start()] + pagetext[mathExpression.end():]
     if not total == 0:
-        print total
     return pagetext
 
      
