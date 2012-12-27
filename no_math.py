@@ -16,11 +16,13 @@ configurations = config('config_no_math.json')
 
 
 def deMath(pagetext):
-    mathExpressions = re.finditer(ur'<math>.*?</math>', pagetext)
-    refExpressions = re.finditer(ur'<ref>.*?</ref>', pagetext)
+    try:
+        mathExpressions = re.finditer(ur'<math>.*?</math>', pagetext)
+    except TypeError:
+        if pagetext:
+            print 'pagetext was not None and is: ', pagetext
     total = 0
     for mathExpression in mathExpressions:
-        print mathExpression.group()
         total += 1
         pagetext = pagetext[:mathExpression.start()] + pagetext[mathExpression.end():]
     if not total == 0:
