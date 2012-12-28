@@ -1,5 +1,6 @@
 {
     "cores": 32, 
     "lumpDirectory": "/data/users/kleinm/enwiki_lumps",
-    "saveLumpDirectory": "/data/users/kleinm/enwiki_lumps_no_math"
+    "saveLumpDirectory": "/data/users/kleinm/enwiki_lumps_no_math",
+    "tempDirectory": "/data/users/kleinm/enwiki_lumps_temp"
 }
