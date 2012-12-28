@@ -93,11 +93,7 @@ class paramFinder:
             return subParamReturnList
         
     def removeMath(self, pagetext):
-        try:
-            root = ET.fromstring(pagetext)
-            for child in root:
-                print child.tag
-        except AssertionError:
-            print "not xml"
+        mathre = re.compile(ur'\&lt;math\&gt;.*?\&lt;/math\&gt;', re.DOTALL)
+        pagetext = re.sub(mathre,'',pagetext)
         return pagetext
         
