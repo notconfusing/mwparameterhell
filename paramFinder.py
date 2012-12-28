@@ -45,8 +45,8 @@ class paramFinder:
             self.reportStatus(self.totalpages)
         if int(page.ns) in self.nsList: #search only the mainspace, can change over different namespaces
             pagetext = page.text #get the wikitext portion of the page object
-            signal.signal(signal.SIGALRM, self._handle_timeout)
-            signal.alarm(5)
+            signal.signal(signal.SIGALRM, self.handleTimeout)
+            signal.alarm(10)
             try: #sometimes if the page is really large or complex this can return an Error
                 wikicode = mwparserfromhell.parse(pagetext)
                 templates = wikicode.filter_templates(recursive=True)
