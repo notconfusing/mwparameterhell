@@ -90,3 +90,8 @@ class paramFinder:
             return None
         else: 
             return subParamReturnList
+        
+    def removeMath(self, pagetext):
+        mathre = re.compile(ur'\&lt;math\&gt;.*?\&lt;/math\&gt;', re.DOTALL)
+        pagetext = re.sub(mathre,'',pagetext)
+        return pagetext
