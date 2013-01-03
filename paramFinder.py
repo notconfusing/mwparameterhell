@@ -64,12 +64,13 @@ class paramFinder:
             targetTemplates = 0
             targetParams = 0
             nonEmptySubParams = 0
-            params = template.params
+            params = 0
             
             for template in templates:
                 if self.isATargetTemplate(template.name):
                     targetTemplates += 1
-                    for param in params:
+                    for param in template.params:
+                        params += 1
                         if self.isATargetParam(param.name):
                             targetParams += 1
                             subParams = self.formatParam(param.value, self.splitSymbol) #sometimes a parma is a list of numbers, or empty space
@@ -79,7 +80,7 @@ class paramFinder:
                                     self.occurencesDictCount[subParam]+=1
                                     self.occurencesDictList[subParam].append(page.title.decode('utf_8'))
             
-            self.fullStatsDict[page.title.decode('utf_8')] = [len(templates),targetTemplates,len(params),targetParams,nonEmptySubParams]
+            self.fullStatsDict[page.title.decode('utf_8')] = [len(templates),targetTemplates,params,targetParams,nonEmptySubParams]
 
 
     def isATargetTemplate(self, wikicode):
@@ -100,24 +101,23 @@ class paramFinder:
     
     def formatParam(self, wikicode, splitSymbol):
         #You many want to do some verification at this step too
-        OCLCNum = re.search(ur'(\s*)([0-9]{1,10})(\s*)(.*)', str(wikicode))
-        if OCLCNum:
+        #OCLCNum = re.search(ur'(\s*)([0-9]{1,10})(\s*)(.*)', str(wikicode))
+        #if OCLCNum:
         #    return OCLCNum.group(2)
         #else:
         #    return None
         subParamText = unicode(wikicode)
         subParamList = subParamText.split(splitSymbol)
-        subParamList = [subParam.strip() for subParam in subParamList]
-        if subParamList == '':
-            return None
         #verify it's a number
         subParamReturnList = list()
         for subParam in subParamList:
-        	subParamRE = re.match(ur'\d+$', subParam):
-        	if subParamRE:
-        		subParamReturnList.append(subParam)
-        	else:
-        		print "invalid subparam: ", subParam
+            subParam = subParam.strip() #whitespace on either side
+            subParam = subParam.replace('-','')#get rid of dashes, cos they are optional and we want to normalize
+            subParamRE = re.match(ur'(oc[nm])?(\d+)', subParam, re.IGNORECASE)
+            if subParamRE:
+                    subParamReturnList.append(subParamRE.group(2))
+            elif not subParam=='':
+                    print "invalid subparam: ", subParam
         	   	
         if subParamReturnList == '':
             return None
