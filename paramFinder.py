@@ -9,8 +9,11 @@ class TimeoutError(Exception):
     pass
 
 class paramFinder:
+    #data containers for counters
     occurencesDictCount = defaultdict(int)
     occurencesDictList = defaultdict(list)
+    #data container for full stats, a dict of pages whose values are list of: total tempaltes, total target templates, total parametes, total parameters, total target parameters, total nonempty subparameters
+    fullStatsDict = {}
 
     totalpages = 0 #totalpages we've paramFound so afr
     times = {'start':None,'previous':None} #we'll be keeping total speed and recent speed
@@ -57,16 +60,26 @@ class paramFinder:
                 return
             finally:
                 signal.alarm(0)
+            #extra necessary counters and lists that will need to be counted
+            targetTemplates = 0
+            targetParams = 0
+            nonEmptySubParams = 0
+            params = template.params
+            
             for template in templates:
                 if self.isATargetTemplate(template.name):
-                    for param in template.params:
+                    targetTemplates += 1
+                    for param in params:
                         if self.isATargetParam(param.name):
-                            subParams = self.formatParam(param.value, self.splitSymbol) #sometimes a parma is a list of numbers of space
+                            targetParams += 1
+                            subParams = self.formatParam(param.value, self.splitSymbol) #sometimes a parma is a list of numbers, or empty space
                             if subParams:
                                 for subParam in subParams:
+                                    nonEmptySubParams += 1
                                     self.occurencesDictCount[subParam]+=1
                                     self.occurencesDictList[subParam].append(page.title.decode('utf_8'))
-
+            
+            self.fullStatsDict[page.title.decode('utf_8')] = [len(templates),targetTemplates,len(params),targetParams,nonEmptySubParams]
 
 
     def isATargetTemplate(self, wikicode):
