@@ -26,12 +26,15 @@ parser.add_argument("parameter", help="the parameter to search for. I.e if you w
 parser.add_argument("-s", "--subparamdelim", default=None, help="the character on which to separate subparameters (you may need to escape your char \). Defaults to None. I.e. if you had {{Cite|Last=Jones, Patel}} None seperation would mean you'd return 'Jones, Patel' or separation on comma -s=',' returns two entries 'Jones' and 'Patel'. You can seperate on space -s=' ' which is useful for numerics.")
 parser.add_argument("-g", "--graph", default=False, action="store_true", help="use R to generate a graph in your results directory")
 parser.add_argument("-n", "--namespaces", default=[0], help="a comma seperated list of namespace numbers to search, default is 0 only - the mainspace. This can drastically affect performance.")
+parser.add_argument("-nc", "--noconfirmation", default=False, action="store_true", help="skip the confirmation step.")
 
 args = parser.parse_args()
 args.templateList = args.templateList.split(',')
 
 print "An excellent choice madam. Your order is, one fries, one milkshake.. \n the template(s): "+ str(args.templateList)+ "\n the parameter: "+ str(args.parameter)+ "\n namespaces: " + str(args.namespaces) + "\n delimiting subparameters on: '"+ str(args.subparamdelim)+"'"+"\n graphing: "+ str(args.graph)
-raw_input("Press enter to conintue or Ctrl-C to try again.")
+
+if not args.noconfirmation:
+    raw_input("Press enter to conintue or Ctrl-C to try again.")
 
 ##The call back that is run over each lump
         

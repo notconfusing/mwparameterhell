@@ -44,8 +44,8 @@ class paramFinder:
        
     def findFun(self, page):   
         self.totalpages += 1
-        if (self.totalpages % 5000) == 0:
-            self.reportStatus(self.totalpages)
+        #if (self.totalpages % 5000) == 0:
+        #    self.reportStatus(self.totalpages)
         if int(page.ns) in self.nsList: #search only the mainspace, can change over different namespaces
             pagetext = page.text #get the wikitext portion of the page object
             signal.signal(signal.SIGALRM, self.handleTimeout)
@@ -56,7 +56,7 @@ class paramFinder:
             except RuntimeError:
                 return
             except TimeoutError:
-                print "toooooo bloody long mate, are you joking on page: ", page.title
+                print "mwparserfromhell timeout on: ", page.title
                 return
             finally:
                 signal.alarm(0)
@@ -117,4 +117,3 @@ class paramFinder:
         mathre = re.compile(ur'\&lt;math\&gt;.*?\&lt;/math\&gt;', re.DOTALL)
         pagetext = re.sub(mathre,'',pagetext)
         return pagetext
-        
