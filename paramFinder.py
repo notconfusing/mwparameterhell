@@ -100,14 +100,25 @@ class paramFinder:
     
     def formatParam(self, wikicode, splitSymbol):
         #You many want to do some verification at this step too
-        #OCLCNum = re.search(ur'(\s*)([0-9]{1,10})(\s*)(.*)', str(wikicode))
-        #if OCLCNum:
+        OCLCNum = re.search(ur'(\s*)([0-9]{1,10})(\s*)(.*)', str(wikicode))
+        if OCLCNum:
         #    return OCLCNum.group(2)
         #else:
         #    return None
         subParamText = unicode(wikicode)
         subParamList = subParamText.split(splitSymbol)
-        subParamReturnList = [subParam.strip() for subParam in subParamList]
+        subParamList = [subParam.strip() for subParam in subParamList]
+        if subParamList == '':
+            return None
+        #verify it's a number
+        subParamReturnList = list()
+        for subParam in subParamList:
+        	subParamRE = re.match(ur'\d+$', subParam):
+        	if subParamRE:
+        		subParamReturnList.append(subParam)
+        	else:
+        		print "invalid subparam: ", subParam
+        	   	
         if subParamReturnList == '':
             return None
         else: 
